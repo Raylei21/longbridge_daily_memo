@@ -1,0 +1,32 @@
+# ── Generated daily reports (contain portfolio/financial data) ──
+longbridge_memo_*.md
+longbridge_memo_*.html
+longbridge_memo_*.pdf
+longbridge_daily_brief.*.pdf
+longbridge_daily_brief_archive.html
+
+# ── Cache files ──
+.archive_cache.json
+.raw_data_*.json
+
+# ── Environment config (user credentials) ──
+.env
+
+# ── User-specific data files ──
+us_symbols.txt
+hk_symbols.txt
+
+# ── Claude local settings ──
+.claude/settings.local.json
+.claude/skills/*.skill
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+
+# ── macOS ──
+.DS_Store
