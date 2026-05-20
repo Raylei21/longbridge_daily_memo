@@ -31,30 +31,42 @@ with open(INPUT_FILE, 'r') as f:
 
 # ── Pre-process: convert ASCII art progress bars to styled divs ──
 def replace_progress_bars(md):
-    """Replace ``` progress bars with styled HTML."""
-    pattern = r'```\n热度: (█+)(░*) (\d+)%.*?\n```'
+    """Replace ``` progress bars with styled HTML.
+    Matches both formats:
+      ```\n热度: ...\n```   (proper fenced block - content on own line)
+      ``` 热度: ... ```    (one-liner - content on same line as opening fence)
+    """
+    pattern = r'```[ \n]热度: (█+)(░*) (\d+)%.*?```'
     def replacer(m):
         filled = len(m.group(1))
         total = filled + len(m.group(2)) if m.group(2) else filled
         pct = m.group(3)
         return f'<div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div><span class="progress-label">{pct}%</span></div>'
-    return re.sub(pattern, replacer, md)
+    return re.sub(pattern, replacer, md, flags=re.DOTALL)
 
 def replace_score_bars(md):
-    """Replace ``` catalytic score bars with styled HTML."""
-    pattern = r'```\n催化评分:\s+([█░]+)\s+([\d.]+)\s*/\s*([\d.]+).*?\n```'
+    """Replace ``` catalytic score bars with styled HTML.
+    Matches both formats:
+      ```\n催化评分: ...\n```   (proper fenced block - content on own line)
+      ``` 催化评分: ...\n...``` (content on same line as opening fence, common LLM output)
+    """
+    pattern = r'```[ \n]催化评分:\s+([█░]+)\s+([\d.]+)\s*/\s*([\d.]+).*?```'
     def replacer(m):
         return f'<div class="score-bar"><div class="score-fill" style="width:{float(m.group(2))/float(m.group(3))*100}%"></div><span class="score-label">{m.group(2)} / {m.group(3)}</span></div>'
-    return re.sub(pattern, replacer, md)
+    return re.sub(pattern, replacer, md, flags=re.DOTALL)
 
 def replace_price_status(md):
-    """Replace price status code blocks."""
-    pattern = r'```\n(?:盘前状态|收盘数据):\s+([\$\d\.,]+)\s+([▲▼])\s*([+-][\d.]+%).*?\n```'
+    """Replace price status code blocks.
+    Matches both formats:
+      ```\n收盘数据: ...\n```   (proper fenced block)
+      ``` 收盘数据: ...\n```   (content on same line as opening fence)
+    """
+    pattern = r'```[ \n](?:盘前状态|收盘数据):\s+([\$\d\.,]+)\s+([▲▼])\s*([+-][\d.]+%).*?```'
     def replacer(m):
         arrow = '^' if m.group(2) == '▲' else 'v'
         color = '#27ae60' if m.group(2) == '▲' else '#e74c3c'
         return f'<div class="price-status" style="color:{color}">{arrow} {m.group(1)} <strong>{m.group(3)}</strong></div>'
-    return re.sub(pattern, replacer, md)
+    return re.sub(pattern, replacer, md, flags=re.DOTALL)
 
 # Apply structure replacements first (they match on original Unicode chars)
 md_text = replace_progress_bars(md_text)

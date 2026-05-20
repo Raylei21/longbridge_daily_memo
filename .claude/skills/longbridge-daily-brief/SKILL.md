@@ -68,12 +68,13 @@ API 返回的 JSON 中每条记录都有 `time` 字段（ISO 8601 格式，如 `
 
 执行以下命令收集基础数据：
 
-1. `longbridge market-temp US --format json` — 获取美股市场温度
+1. `longbridge market-temp US --format json` — 获取美股市场温度。**注意：Description字段为英文，需翻译为中文**（如 "Temp Comfortable & Gradually Dropping" → "舒适区间，逐步降温"，"Temp Comfortable & Gradually Rising" → "舒适区间，温和上升")
 2. `longbridge portfolio --format json` — 获取持仓组合
 3. `longbridge order --history --start <T-1日> --end <T日> --format json` — 获取T-1日交易记录（用于交易复盘模块）
 4. `longbridge watchlist --format json` — 获取全部自选股列表（267只）
 5. `longbridge finance-calendar report --filter watchlist --market US --start <今天> --end <30天后> --format json` — 自选股未来30天财报日历
 6. `longbridge finance-calendar macrodata --market US --star 3 --start <今天> --end <14天后> --format json` — 未来2周重要宏观数据
+7. **`longbridge quote .VIX.US --format json`** — 获取VIX恐慌指数（**注意：必须使用 `.VIX.US`，不是 `^VIX`**）
 
 #### 宏观流动性数据（新增）
 
@@ -285,6 +286,27 @@ longbridge news search "非农 NFP employment" --count 10 --format json
    盘前状态:  $238.02  ▲ +8.64%  |  成交量 1,200,124 股
    ```
 
+6. **🔴 严禁：``` 后直接跟内容（同一行）** — ` ``` ` 开闭标记必须单独占一行，正文必须在 ` ``` ` 的下一行开始。
+   Python Markdown 的 `fenced_code` 扩展要求 ` ``` ` 后紧跟换行符（`\n`）才能识别为代码块。如果内容与 ` ``` ` 在同一行（例如 `` ``` 催化评分:  ██████████ 4.2 / 5.0 ``），则：
+   - 该行不会被识别为代码块开始
+   - 后续的独立 ` ``` ` 会被误认为是新代码块的开始，从而"吞掉"其后的所有内容（包括表格、文字等）
+   - 最终导致该股票的全部表格和正文被渲染成灰色代码框，数据完全不可读
+   - 此错误已在 AMAT.US 日报中实际发生过
+
+   ❌ **错误格式（禁止使用）**：
+   ````markdown
+   ``` 催化评分:  ██████████ 4.2 / 5.0
+   收盘数据:  $436.62  ▼ -0.89%  |  成交量 1,277 万股  |  成交额 $55.6亿
+   ```
+   ````
+   ✅ **正确格式（必须使用）**：
+   ````markdown
+   ```
+   催化评分:  ██████████ 4.2 / 5.0
+   收盘数据:  $436.62  ▼ -0.89%  |  成交量 1,277 万股  |  成交额 $55.6亿
+   ```
+   ````
+
 完整 markdown 结构模板：
 
 ```markdown
@@ -294,6 +316,12 @@ longbridge news search "非农 NFP employment" --count 10 --format json
 ---
 
 ## ━━ Market Dashboard ━━
+
+> **注意：市场温度的 Description 字段 API 返回英文，生成时必须翻译为中文**。常见翻译对照：
+> - "Temp Comfortable & Gradually Dropping" → "舒适区间，逐步降温"
+> - "Temp Comfortable & Gradually Rising" → "舒适区间，温和上升"
+> - "Temp Hot & Gradually Rising" → "偏热区间，持续升温"
+> - "Temp Cold & Gradually Dropping" → "偏冷区间，持续降温"
 
 | 指标 | 读数 | 信号 |
 |:---|---|:---:|
