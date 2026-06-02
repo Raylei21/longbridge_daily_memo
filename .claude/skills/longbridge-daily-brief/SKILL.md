@@ -39,7 +39,7 @@ description: >
 | 数据类型 | 时间窗口 | 说明 |
 |----------|----------|------|
 | 持仓+盈亏 | 当前快照 | 实时数据，无需过滤 |
-| 📝 交易记录 | **T-1日全天** | 北京时间 `T-1日 00:00` ~ `T-1日 24:00` |
+| 📝 交易记录 | **T-1日全天** | 北京时间 `T-1日 00:00` ~ `T-1日 24:00`<br>⚠️ 查询时必须同时查**今日订单**（不加 `--history`）+ **历史订单**（加 `--history`），见第一阶段第3步 |
 | 📰 新闻 | **严格 24h** | 北京时间 `T-1日 05:00` ~ `T日 05:00` |
 | 💬 话题 | **宽松 48h** | 北京时间 `T-2日 05:00` ~ `T日 05:00` |
 | 📊 报价/资金流向 | 当前交易数据 | 盘前/盘中快照 |
@@ -70,7 +70,10 @@ API 返回的 JSON 中每条记录都有 `time` 字段（ISO 8601 格式，如 `
 
 1. `longbridge market-temp US --format json` — 获取美股市场温度。**注意：Description字段为英文，需翻译为中文**（如 "Temp Comfortable & Gradually Dropping" → "舒适区间，逐步降温"，"Temp Comfortable & Gradually Rising" → "舒适区间，温和上升")
 2. `longbridge portfolio --format json` — 获取持仓组合
-3. `longbridge order --history --start <T-1日> --end <T日> --format json` — 获取T-1日交易记录（用于交易复盘模块）
+3. 获取T-1日交易记录（两条命令都必须执行，结果合并去重）：
+   - `longbridge order --format json` — **今日订单**（不加 `--history`），因 Longbridge CLI 将当前美东交易日视为"今日"而非"历史"
+   - `longbridge order --history --start <T-1日> --end <T日> --format json` — **历史订单**
+   - **⚠️ 坑点**：`--history` 不包含当日的成交订单。如 T-1 日 = 上一个美东交易日，该日的订单可能在"今日"列表中。必须同时查询两条命令并合并去重，避免遗漏盘前/盘后交易。
 4. `longbridge watchlist --format json` — 获取全部自选股列表（267只）
 5. `longbridge finance-calendar report --filter watchlist --market US --start <今天> --end <30天后> --format json` — 自选股未来30天财报日历
 6. `longbridge finance-calendar macrodata --market US --star 3 --start <今天> --end <14天后> --format json` — 未来2周重要宏观数据
